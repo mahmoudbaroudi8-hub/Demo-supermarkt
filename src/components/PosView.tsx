@@ -11,7 +11,9 @@ import {
   ShoppingCart, 
   Check, 
   X,
-  AlertCircle
+  AlertCircle,
+  Grid,
+  ArrowLeft
 } from 'lucide-react';
 import { Product, CartItem, Customer, Transaction } from '../types';
 
@@ -39,6 +41,7 @@ export const PosView: React.FC<PosViewProps> = ({
   const [selectedCustomer, setSelectedCustomer] = useState('نقدي / زبون عابر');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'credit'>('cash');
+  const [activeMobileView, setActiveMobileView] = useState<'products' | 'cart'>('products');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const categories = [
@@ -162,16 +165,50 @@ export const PosView: React.FC<PosViewProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-65px)] bg-[#F5F7FA] overflow-hidden select-none">
+    <div className="flex flex-col h-[calc(100vh-65px)] bg-[#F5F7FA] overflow-hidden select-none relative">
       
+      {/* Mobile Top View Switcher (Products vs Cart) */}
+      <div className="md:hidden flex items-center bg-white border-b border-slate-200 p-2 gap-2 shrink-0 z-20 shadow-xs">
+        <button
+          onClick={() => setActiveMobileView('products')}
+          className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer ${
+            activeMobileView === 'products'
+              ? 'bg-[#1B2A5B] text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700'
+          }`}
+        >
+          <Grid className="w-4 h-4" />
+          <span>المنتجات والمعرض ({filteredProducts.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveMobileView('cart')}
+          className={`flex-1 py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition relative cursor-pointer ${
+            activeMobileView === 'cart'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : 'bg-slate-100 text-slate-700'
+          }`}
+        >
+          <ShoppingCart className="w-4 h-4" />
+          <span>السلة ({cart.reduce((s, i) => s + i.quantity, 0)})</span>
+          {cart.length > 0 && (
+            <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+              {total.toFixed(0)}ج
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Main Grid: Left Products Grid + Right Side Cart */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         
         {/* PRODUCTS AREA (Left side) */}
-        <div className="flex-1 p-5 flex flex-col overflow-y-auto space-y-4">
+        <div className={`flex-1 p-3 sm:p-5 flex-col overflow-y-auto space-y-4 ${
+          activeMobileView === 'products' ? 'flex w-full' : 'hidden md:flex'
+        }`}>
           
           {/* Top Bar: Search / Barcode Input + Category Tabs */}
-          <div className="flex flex-col md:flex-row gap-3 items-stretch">
+          <div className="flex flex-col md:flex-row gap-2.5 sm:gap-3 items-stretch">
             {/* Search / Barcode Input */}
             <div className="relative flex-1">
               <Barcode className="w-5 h-5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
@@ -180,8 +217,8 @@ export const PosView: React.FC<PosViewProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="قم بمسح الباركود أو ابحث عن المنتج هنا... (F1)"
-                className="w-full pr-11 pl-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-2xs"
+                placeholder="مسح الباركود أو ابحث عن المنتج... (F1)"
+                className="w-full pr-11 pl-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none shadow-2xs"
               />
             </div>
 
@@ -191,7 +228,7 @@ export const PosView: React.FC<PosViewProps> = ({
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
                     selectedCategory === cat
                       ? 'bg-[#1B2A5B] text-white shadow-xs'
                       : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -204,46 +241,46 @@ export const PosView: React.FC<PosViewProps> = ({
           </div>
 
           {/* Product Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 pb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pb-20 md:pb-8">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-slate-200/90 p-3 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+                className="bg-white rounded-2xl border border-slate-200/90 p-2.5 sm:p-3 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
               >
                 <div>
-                  <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-slate-100 mb-2.5 border border-slate-100">
+                  <div className="relative aspect-4/3 rounded-xl overflow-hidden bg-slate-100 mb-2 border border-slate-100">
                     <img
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-900/70 text-white backdrop-blur-xs">
+                    <span className="absolute top-1.5 right-1.5 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-900/70 text-white backdrop-blur-xs">
                       {product.unit}
                     </span>
                     {product.stock <= 5 && (
-                      <span className="absolute bottom-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white">
+                      <span className="absolute bottom-1.5 right-1.5 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-600 text-white">
                         {product.stock === 0 ? 'نفذت' : `متبقي ${product.stock}`}
                       </span>
                     )}
                   </div>
 
-                  <h3 className="font-bold text-xs text-slate-800 line-clamp-2 leading-snug mb-1">
+                  <h3 className="font-bold text-xs text-slate-800 line-clamp-2 leading-snug mb-0.5">
                     {product.name}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-semibold block mb-2">
+                  <span className="text-[10px] text-slate-400 font-semibold block mb-1.5">
                     {product.category}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-1">
                   <div>
-                    <span className="text-sm font-black text-blue-700">{product.price.toFixed(2)}</span>
-                    <span className="text-[10px] text-slate-500 font-bold mr-1">{currencySymbol}</span>
+                    <span className="text-xs sm:text-sm font-black text-blue-700">{product.price.toFixed(2)}</span>
+                    <span className="text-[9px] sm:text-[10px] text-slate-500 font-bold mr-0.5">{currencySymbol}</span>
                   </div>
                   <button
                     onClick={() => addToCart(product)}
                     disabled={product.stock === 0}
-                    className={`p-2 rounded-xl text-white font-bold transition flex items-center justify-center cursor-pointer ${
+                    className={`p-1.5 sm:p-2 rounded-xl text-white font-bold transition flex items-center justify-center cursor-pointer ${
                       product.stock === 0
                         ? 'bg-slate-300 cursor-not-allowed'
                         : 'bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/30 active:scale-95'
@@ -259,8 +296,32 @@ export const PosView: React.FC<PosViewProps> = ({
 
         </div>
 
-        {/* SIDE CART AREA (Right side) */}
-        <div className="w-80 lg:w-96 bg-white border-r border-slate-200 flex flex-col justify-between shadow-lg shrink-0 z-10">
+        {/* Floating Mobile Bottom Quick Action for Cart */}
+        {cart.length > 0 && activeMobileView === 'products' && (
+          <div className="md:hidden fixed bottom-16 left-3 right-3 bg-[#1B2A5B] text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between z-30 border border-slate-700/80">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center font-extrabold text-xs">
+                {cart.reduce((s, i) => s + i.quantity, 0)}
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-300 font-semibold">إجمالي السلة الحالي</p>
+                <p className="text-xs font-black text-amber-300">{total.toFixed(2)} {currencySymbol}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveMobileView('cart')}
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>عرض السلة ودفع</span>
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* SIDE CART AREA */}
+        <div className={`bg-white border-r border-slate-200 flex-col justify-between shadow-lg shrink-0 z-10 ${
+          activeMobileView === 'cart' ? 'w-full flex flex-1 h-full' : 'hidden md:flex md:w-80 lg:w-96'
+        }`}>
           
           {/* Cart Header */}
           <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
@@ -386,7 +447,7 @@ export const PosView: React.FC<PosViewProps> = ({
       </div>
 
       {/* Bottom Shortcuts Bar */}
-      <footer className="bg-[#1B2A5B] text-white px-6 py-2.5 text-xs flex flex-wrap items-center justify-between border-t border-slate-800 shrink-0 font-medium">
+      <footer className="hidden md:flex bg-[#1B2A5B] text-white px-6 py-2.5 text-xs flex-wrap items-center justify-between border-t border-slate-800 shrink-0 font-medium">
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1.5"><strong className="bg-blue-600 px-1.5 py-0.5 rounded text-[10px]">F1</strong> بحث منتج</span>
           <span className="flex items-center gap-1.5"><strong className="bg-blue-600 px-1.5 py-0.5 rounded text-[10px]">F2</strong> إضافة عميل</span>
