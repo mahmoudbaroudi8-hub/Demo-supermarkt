@@ -1,0 +1,8 @@
+{
+  "name": "نظام إدارة سوبر ماركت الأصيل",
+  "description": "نظام متكامل لإدارة مبيعات السوبر ماركت والمخزون ونقاط البيع (POS) والموردين والعملاء والتقارير المالية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
