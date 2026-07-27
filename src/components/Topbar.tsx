@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Bell, HelpCircle, Calendar, MapPin, CheckCircle, AlertTriangle, Info, X, LogOut, RotateCcw, Sparkles } from 'lucide-react';
+import { Search, Bell, HelpCircle, Calendar, MapPin, CheckCircle, AlertTriangle, Info, X, LogOut, RotateCcw, Sparkles, Menu } from 'lucide-react';
 import { NotificationItem } from '../types';
 
 interface TopbarProps {
@@ -14,6 +14,7 @@ interface TopbarProps {
   timeLeftMs?: number;
   onResetDemoTimer?: () => void;
   onForceLockSystem?: () => void;
+  onToggleMobileMenu?: () => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -27,7 +28,8 @@ export const Topbar: React.FC<TopbarProps> = ({
   onQuickDemoReset,
   timeLeftMs,
   onResetDemoTimer,
-  onForceLockSystem
+  onForceLockSystem,
+  onToggleMobileMenu
 }) => {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -46,17 +48,27 @@ export const Topbar: React.FC<TopbarProps> = ({
   };
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between sticky top-0 z-20 shadow-xs">
-      {/* Search and Current Location / Page Title */}
-      <div className="flex items-center gap-6 flex-1 max-w-2xl">
+    <header className="bg-white border-b border-slate-200 px-3 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+      {/* Search and Mobile Drawer Button */}
+      <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-2xl">
+        {onToggleMobileMenu && (
+          <button
+            onClick={onToggleMobileMenu}
+            className="lg:hidden p-2 text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition"
+            title="القائمة القائمة الرئيسية"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+
         <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={globalSearch}
             onChange={(e) => setGlobalSearch(e.target.value)}
-            placeholder="بحث عام (منتج، فاتورة، عميل، باركود...)"
-            className="w-full pr-10 pl-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+            placeholder="بحث (منتج، فاتورة، عميل...)"
+            className="w-full pr-9 pl-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
           />
           {globalSearch && (
             <button 

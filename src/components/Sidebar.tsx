@@ -8,7 +8,8 @@ import {
   BarChart3, 
   Settings, 
   Store,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react';
 import { TabType } from '../types';
 
@@ -16,9 +17,10 @@ interface SidebarProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   lowStockCount?: number;
+  onCloseMobile?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, lowStockCount = 5 }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, lowStockCount = 5, onCloseMobile }) => {
   const navItems = [
     { id: 'dashboard' as TabType, label: 'الرئيسية', icon: LayoutDashboard },
     { id: 'pos' as TabType, label: 'نقطة البيع', icon: ShoppingCart },
@@ -29,11 +31,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, lowSt
     { id: 'settings' as TabType, label: 'الإعدادات', icon: Settings },
   ];
 
+  const handleSelectTab = (id: TabType) => {
+    setActiveTab(id);
+    if (onCloseMobile) onCloseMobile();
+  };
+
   return (
-    <aside className="w-64 bg-[#1B2A5B] text-white flex flex-col justify-between shrink-0 h-screen sticky top-0 shadow-xl border-l border-slate-800/40 z-30 select-none">
+    <aside className="w-64 bg-[#1B2A5B] text-white flex flex-col justify-between shrink-0 h-full min-h-screen sticky top-0 shadow-xl border-l border-slate-800/40 z-30 select-none">
       <div>
         {/* Store Brand Header */}
-        <div className="p-5 border-b border-slate-700/60 flex flex-col items-center justify-center text-center bg-[#15224a]">
+        <div className="p-5 border-b border-slate-700/60 flex flex-col items-center justify-center text-center bg-[#15224a] relative">
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="lg:hidden absolute top-4 left-4 p-1.5 text-slate-300 hover:text-white bg-slate-800/60 rounded-xl"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
           <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg shadow-blue-600/30 ring-4 ring-blue-500/20">
             <Store className="w-8 h-8 text-white" />
           </div>
@@ -51,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, lowSt
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => handleSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group cursor-pointer ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'

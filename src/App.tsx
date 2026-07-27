@@ -376,6 +376,8 @@ export default function App() {
     ]);
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const lowStockCount = products.filter(p => p.stock <= 10).length;
 
   // 1. If Demo is expired and current user is NOT a developer, show full Lock screen
@@ -405,14 +407,34 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F7FA] text-slate-800 font-['Cairo',sans-serif] antialiased">
+    <div className="flex min-h-screen bg-[#F5F7FA] text-slate-800 font-['Cairo',sans-serif] antialiased pb-16 lg:pb-0">
       
-      {/* Right Fixed Sidebar */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        lowStockCount={lowStockCount} 
-      />
+      {/* Mobile Sidebar Overlay Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div 
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="relative flex-1 max-w-xs w-full bg-[#1B2A5B] z-10 shadow-2xl h-full">
+            <Sidebar 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              lowStockCount={lowStockCount} 
+              onCloseMobile={() => setMobileMenuOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block shrink-0">
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          lowStockCount={lowStockCount} 
+        />
+      </div>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -430,6 +452,7 @@ export default function App() {
           timeLeftMs={timeLeftMs}
           onResetDemoTimer={handleResetDemoTimer}
           onForceLockSystem={handleForceLockSystem}
+          onToggleMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         {/* Dynamic Screen View */}
@@ -561,6 +584,43 @@ export default function App() {
         onClose={() => setIsProcurementOpen(false)}
         onSubmitOrder={handleSubmitProcurement}
       />
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#1B2A5B] border-t border-slate-700/80 px-2 py-1.5 flex items-center justify-around z-40 text-white shadow-2xl">
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            activeTab === 'dashboard' ? 'text-amber-400 font-extrabold bg-white/10' : 'text-slate-300'
+          }`}
+        >
+          <span className="text-[10px]">الرئيسية</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('pos')}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            activeTab === 'pos' ? 'text-amber-400 font-extrabold bg-white/10' : 'text-slate-300'
+          }`}
+        >
+          <span className="text-[10px]">نقطة البيع</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('inventory')}
+          className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition ${
+            activeTab === 'inventory' ? 'text-amber-400 font-extrabold bg-white/10' : 'text-slate-300'
+          }`}
+        >
+          <span className="text-[10px]">المخزون</span>
+        </button>
+
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-300 hover:text-white"
+        >
+          <span className="text-[10px]">القائمة ☰</span>
+        </button>
+      </nav>
 
     </div>
   );
